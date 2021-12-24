@@ -1,0 +1,42 @@
+#+TITLE: Three Body Problem in OCaml
+
+Some fun and experiments with the three-body problem in OCaml. The goals of this
+repo are vaguely:
+
+1. Gain familiarity with [[https://ocaml.xyz/][owl]], a numerical computation and analysis OCaml library
+2. Get some practice with some typical numerical tasks such as asymptotics,
+   stability analysis, Lyapunov exponent estimation, interesting reductions in
+   certain configurations, etc.
+3. Get some practice with unit testing numerical libraries. Its a task that is
+   both (i) harder than you'd think, and (ii) pops up more than you think, so
+   here we are.
+
+
+In reality this is going to be an N-body simulation, the `Hello World` of
+Mod&Sim (I bet).
+
+* maybe a case study: gaps in Saturn's rings
+One particular problem I want to work towards in this library is simulating the
+three-body problem in a setup similar to the {asteroids/dust, moon, Saturn}
+configuration. In particular, there are gaps and bands in the rings of Saturn
+and I've had quite a few different explanations for the same phenomenon. A
+common explanation is that a harmonic occurs at integer-valued ratios of orbits
+lengths?  masses? etc. This produces band gaps by effectively stimulating a FHO
+on the small-mass dust/rocks due to the orbit of the medium-valued mass
+moon. The planet Saturn is assumed large enough that it doesn't orbit about a
+center.
+
+I'll probably post some math with some analysis of the situation when I
+feel motivated to do it (it instead of unga-bunga numerical integration). 
+
+The upshot is that the three-body problem with the above simplification results
+in a stable attracting trajectory for the smaller two bodies, with the
+asymptotic trajectory forcing a synchronization of inner and outer orbit
+periods. Smaller bodies with "harmonic" ratios of periods will evolve through
+this process quicker since the synchronization is already frequent (whereas
+other ratios cause more "chaotic" contributions which cancel each-other out
+frequently). This is the cause of the small-harmonic contributions being
+dominant in the gaps (i'd guess at least, like 1/2, 3/7, ...). Since this
+configuration is stable, all inner debris satisfying the conditions will clump
+into a ball since they all satisfy the same trajectory, hence colliding and
+creating a gap (given enough time).

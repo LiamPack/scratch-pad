@@ -1,0 +1,8 @@
+#!r6rs ; -*- mode: scheme; coding: utf-8 -*-
+(import (akku format manifest))
+
+(akku-package ("advent-of-code-sc" "1.0.0-alpha.0")
+  (synopsis "Advent of Code 2021 solutions (so far)")
+  (authors "sync")
+  (license "MIT")
+  (depends ("chez-srfi" ">=0.0.0-akku <1.0.0")))

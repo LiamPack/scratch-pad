@@ -1,0 +1,22 @@
+#+title: Advent of Code
+
+Just some of my advent of code solutions. Putting them up so that I don't forget
+about them.
+
+The quality of the code will range from clean to messy. Sometimes you just want
+to get the solution out of the computer as fast as you can. Lisps and Schemes are
+pretty good for that, but it also means things can get messy if you're not
+careful (i'm not always careful).
+
+In light of the above warning, all solutions are written with the intention of
+loading them into a REPL for iterative development (with e.g. [[https://www.nongnu.org/geiser/][geiser]] or [[https://github.com/joaotavora/sly][sly]] or
+[[https://github.com/gcv/julia-snail][julia-snail]]). There are no tests since the "test case" is a successful output on
+the puzzle input, which is obtained after the first correct construction of a
+solution. Sorry. Robustness isn't needed if the puzzle is already solved!
+
+Language for solutions may vary depending on the type of problem. So far, most
+have been completed in Chez Scheme (9.5) with SRFI 13 for string manipulation of
+the puzzle inputs. A couple (14, 15, ...) have been done with julia 1.7.0. 
+
+Puzzles 1 and 2 of 2021 are not stored below since they were done basically
+inline with Emacs lisp during a lunch break.

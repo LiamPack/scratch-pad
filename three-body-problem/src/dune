@@ -1,0 +1,3 @@
+(library
+  (name Three_body)
+  (libraries owl owl-plplot owl-ode))

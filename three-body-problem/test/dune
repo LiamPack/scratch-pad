@@ -1,0 +1,5 @@
+(tests
+ (names run_tests)
+ (libraries oUnit Three_body owl owl-plplot)
+ (action
+  (run %{test})))
