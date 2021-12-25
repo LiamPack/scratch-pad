@@ -4,10 +4,13 @@
 
 open Owl
 
-(* this program might be overengineered by packing the dynamics into `plot`. *)
 (* make sure that the denominator of r^hat / r^3 doesn't bottom out to 0 *)
 let numerical_zero = Mat.of_array [| 1E-13 |] 1 1
-let mass = 1.
+let masses = [| 1.; 0.1; 0.01|]
+
+let bodies = Mat.of_arrays [| [| 0.; 0. |]; [| 1.; 0.|]; [| -1.; 0.|]|]
+let bodiesVs = Mat.of_arrays [| [| 0.01; 0. |]; [| 0.; 1.|]; [| 0.; -1.|]|]
+
 
 let f_1 planets =
   let force = Mat.(zeros (row_num planets) (col_num planets)) in
@@ -16,7 +19,7 @@ let f_1 planets =
     let dr = planets - row planets i in
     let dr_sqr = l2norm_sqr ~axis:1 dr in
     let dr3_recip = 1. $/ (max2 (dr_sqr * sqrt dr_sqr) numerical_zero) in
-    force.${[]} <- force.${[]} - (mass $* (dr * dr3_recip))
+    force.${[]} <- force.${[]} - ((dr * dr3_recip) *$ (Array.get masses i))
   done;
   force
 
@@ -37,20 +40,14 @@ let integrate t dt (ps, vs) =
   integrate_helper t dt [ ps ] [ vs ] []
 
 
+let plot_one_mat m scale ind =
+  let h = Owl_plplot.Plot.create ("plots/" ^ string_of_int ind ^ ".png") in
+  let open Owl_plplot.Plot in
+  set_xrange h (scale *. -5.) (scale *. 5.);
+  set_yrange h (scale *. -5.) (scale *. 5.);
+  scatter ~h ~spec:[ Marker "#[0x229a]"; MarkerSize 5. ] (Mat.col m 0) (Mat.col m 1);
+  output h
 
-let scale = 1.1
-
-(* let n_bodies = 3 *)
-
-(* let n_dims = 2 *)
-
-(* let bodies = Mat.gaussian ~mu:0.0 ~sigma:(scale *. 1.) n_bodies n_dims *)
-
-(* (\* let bodiesVs = Mat.zeros n_bodies n_dims *\) *)
-(* let bodiesVs = Mat.gaussian ~mu:0.0 ~sigma:(scale *. 1.) n_bodies n_dims *)
-
-let bodies = Mat.of_arrays [| [| 0.; 0. |]; [| 1.; 0.|]; [| -1.; 0.|]|]
-let bodiesVs = Mat.of_arrays [| [| 0.01; 0. |]; [| 0.; 1.|]; [| 0.; -1.|]|]
 
 let plot duration =
   let dt = 0.1 in
@@ -59,13 +56,8 @@ let plot duration =
   (* let h = .. *)
   let ind = ref (List.length ps) in
   let plot_mat m _ =
-    let h = Owl_plplot.Plot.create ("plots/" ^ string_of_int !ind ^ ".png") in
+    plot_one_mat m 1. !ind;
     ind := !ind - 1;
-    let open Owl_plplot.Plot in
-    set_xrange h (scale *. -5.) (scale *. 5.);
-    set_yrange h (scale *. -5.) (scale *. 5.);
-    scatter ~h ~spec:[ Marker "#[0x229a]"; MarkerSize 5. ] (Mat.col m 0) (Mat.col m 1);
-    output h
   in
   Mat.print (List.nth ps (List.length ps - 1));
   let _ = List.map2 plot_mat ps ts in
