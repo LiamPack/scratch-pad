@@ -1,0 +1,18 @@
+* Silly Leet code solutions
+
+Since I'm growing increasingly bored and have very few ideas to play around with these days,
+I'm spending my time (perhaps (un)wisely) by solving [[https://leetcode.com/][LeetCode]] problems.
+
+Some reasons I've gotten back into this:
+- They have a Racket interpreter option. It's too funny not to use, and most other languages
+  are just plain boring
+- I haven't had to seriously grind little algorithm puzzles before, mostly due to the fact
+  that I graded for the advanced algorithms class and have had my mind numbed by dynamic
+  programming, graph algorithms, etc. I'm starting to miss the brain-rot..
+- Daily challenges make it fun to have something completed for the day
+- Writing up explanations solutions reinforces and solidifies understanding of general
+  approaches, most of which I'm very rusty on
+
+
+All solutions will probably be in Racket until they add another funny language to the
+list. All the others are just boring. Where's Haskell? Vanilla scheme? OCaml? Hello? 
