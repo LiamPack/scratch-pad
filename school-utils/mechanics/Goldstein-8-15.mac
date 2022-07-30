@@ -1,0 +1,20 @@
+/* Algebraic specification of a solution to Goldstein problem 8.15 */
+
+L(q1, qd1, q2, qd2) := qd1^2 + qd2^2/(a + b * q1^2) + k1 * q1^2 + k2 * qd1 * qd2;
+
+e1 : p1 = diff(L(q1, qd1, q2, qd2), qd1);
+e2 : p2 = diff(L(q1, qd1, q2, qd2), qd2);
+p10 : rhs(e1);
+p20 : rhs(e2);
+
+sols : first(solve([e1, e2], [qd1, qd2]));
+qd10 : first(sols);
+qd10 : second(sols);
+
+/* Hamiltonian := Legendre transformation of Lagrangian, with qdot solved for as qdot(p) */
+H(q1, p1, q2, p2) := qd10 * p1 + qd20 * p2 - L(q1, qd10, q2, qd20);
+
+Hq1 : ratsimp(diff(H(q1, p1, q2, p2), p1));
+Hq2 : ratsimp(diff(H(q1, p1, q2, p2), p2));
+Hp1 : ratsimp(-diff(H(q1, p1, q2, p2), q1));
+Hp2 : ratsimp(-diff(H(q1, p1, q2, p2), q2));
