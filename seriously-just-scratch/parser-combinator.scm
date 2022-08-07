@@ -1,5 +1,5 @@
-;; the below code stack-overflows at ~150 "many"s in kawa. Needs to have
-;; tail-recursive definition, but idc
+;; the below code stack-overflows at ~150 "many"s in kawa, but somehow
+;; chez tail-call optimizes things. very weird.
 
 (define (return v) (lambda (s ks kf) (ks v s)))
 (define fail (lambda (s ks kf) (kf)))
@@ -150,7 +150,7 @@
 
 (define (run-parser p str)
   (p (string->list str)
-     (lambda (v s) (format #t "Parser ran successfully. Result is ~a, remainder is ~a.~%" v (list->string s) ))
+     (lambda (v s) (format #t "Parser ran successfully.~%") v)
      (lambda () (format #t "Parser failed.~%"))))
 
 
@@ -210,24 +210,24 @@
 
 (define-record-type pre-frame-update
   (fields
-   frame_number
-   player_index
-   is_follower
-   random_seed
-   action_state_id
-   x_position
-   y_position
-   facing_direction
-   joystick_x
-   joystick_y
-   c_stick_x
-   c_stick_y
+   frame-number
+   player-index
+   is-follower
+   random-seed
+   action-state-id
+   x-position
+   y-position
+   facing-direction
+   joystick-x
+   joystick-y
+   c-stick-x
+   c-stick-y
    trigger
-   processed_buttons
-   physical_buttons
-   physical_l_trigger
-   physical_r_trigger
-   x_analog_ucf
+   processed-buttons
+   physical-buttons
+   physical-l-trigger
+   physical-r-trigger
+   x-analog-ucf
    percent))
 
 (define pre-frame-update/p
@@ -255,39 +255,39 @@
 
 (define-record-type post-frame-update
   (fields
-   frame_number 
-   player_index 
-   is_follower 
-   internal_character_id 
-   action_state_id 
-   x_position 
-   y_position 
-   facing_direction 
+   frame-number 
+   player-index 
+   is-follower 
+   internal-character-id 
+   action-state-id 
+   x-position 
+   y-position 
+   facing-direction 
    percent 
-   shield_size 
-   last_hitting_attack_id 
-   current_combo_count 
-   last_hit_by 
-   stocks_remaining 
-   action_state_frame_counter 
-   state_bit_flags_1 
-   state_bit_flags_2 
-   state_bit_flags_3 
-   state_bit_flags_4 
-   state_bit_flags_5 
-   misc_as 
-   ground_air_state 
-   last_ground_id 
-   jumps_remaining 
-   l_cancel_status 
-   hurtbox_collision_state 
-   self_induced_air_x_speed 
-   self_induced_air_y_speed 
-   attack_based_x_speed 
-   attack_based_y_speed 
-   self_induced_ground_x_speed 
-   hitlag_frames_remaining 
-   animation_index))
+   shield-size 
+   last-hitting-attack-id 
+   current-combo-count 
+   last-hit-by 
+   stocks-remaining 
+   action-state-frame-counter 
+   state-bit-flags-1 
+   state-bit-flags-2 
+   state-bit-flags-3 
+   state-bit-flags-4 
+   state-bit-flags-5 
+   misc-as 
+   ground-air-state 
+   last-ground-id 
+   jumps-remaining 
+   l-cancel-status 
+   hurtbox-collision-state 
+   self-induced-air-x-speed 
+   self-induced-air-y-speed 
+   attack-based-x-speed 
+   attack-based-y-speed 
+   self-induced-ground-x-speed 
+   hitlag-frames-remaining 
+   animation-index))
 
 (define post-frame-update/p
   (lift (all-of/p
@@ -364,3 +364,25 @@
                      ;; [(#\x10)]
                      [else  (take (cdr (assoc s payloads)))]))))])
        (many/p event/p)))))
+
+
+(define (get-distances slp)
+  (define postframes (filter (lambda (x) (post-frame-update? x)) slp))
+  (define-values (g1 g2)
+    (partition (lambda (x) (= (post-frame-update-player-index x) 1)) postframes))
+  (define (sqr x) (expt x 2))
+  (define distances
+    (map
+     (lambda (p1 p2)
+       (sqrt (+ 
+              (sqr
+               (- (post-frame-update-y-position p1)
+                  (post-frame-update-y-position p2)))
+              (sqr
+               (- (post-frame-update-x-position p1)
+                  (post-frame-update-x-position p2)))))) g1 g2))
+  distances)
+
+(define in (read-file in-file))
+(define out (run-parser slippi/p in))
+(define distances (get-distances out))
