@@ -1,6 +1,11 @@
 ;; the below code stack-overflows at ~150 "many"s in kawa, but somehow
 ;; chez tail-call optimizes things. very weird.
 
+;; the bare initial pieces of this (return, fail, bind, etc.) referenced
+;; from https://gist.github.com/UnkindPartition/3904294 -- 10 years ago!
+;; Slick ideas using the "success" input function as the vehicle for
+;; composition of parsers
+
 (define (return v) (lambda (s ks kf) (ks v s)))
 (define fail (lambda (s ks kf) (kf)))
 (define empty/p (return '()))
