@@ -58,9 +58,10 @@
 
 (define any-char/p
   (lambda (s ks kf)
-    (if (null? s)
-        (kf)
-        (ks (car s) (cdr s)))))
+    (if (not (null? s))
+        (ks (car s) (cdr s))
+        (begin
+          (kf)))))
 
 (define (take n)
   (define (helper n1)
@@ -74,14 +75,21 @@
 (define take1 (take 1))
 
 
+(define uint8/p
+  (lift take1 (lambda (x) (bytevector-u8-ref (u8-list->bytevector (map char->integer (string->list x))) 0))))
+(define uint16/p
+  (lift (take 2) (lambda (x) (bytevector-u16-ref (u8-list->bytevector (map char->integer (string->list x))) 0 (endianness big))))
+  )
+(define uint32/p
+  (lift (take 4) (lambda (x) (bytevector-u32-ref (u8-list->bytevector (map char->integer (string->list x))) 0 (endianness big)))))
 
-(define uint8/p)
-(define uint16/p)
-(define uint32/p)
-
-(define int8/p)
-(define int16/p)
-(define int32/p)
+(define int8/p
+  (lift take1 (lambda (x) (bytevector-s8-ref (u8-list->bytevector (map char->integer (string->list x))) 0))))
+(define int16/p
+  (lift (take 2) (lambda (x) (bytevector-s16-ref (u8-list->bytevector (map char->integer (string->list x))) 0 (endianness big))))
+  )
+(define int32/p
+  (lift (take 4) (lambda (x) (bytevector-s32-ref (u8-list->bytevector (map char->integer (string->list x))) 0 (endianness big)))))
 
 
 (define (run-parser p str)
