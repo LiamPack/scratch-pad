@@ -4,6 +4,10 @@
 (define (return v) (lambda (s ks kf) (ks v s)))
 (define fail (lambda (s ks kf) (kf)))
 (define empty/p (return '()))
+(define peek1 (lambda (s ks kf)
+                (if (null? s)
+                    (kf)
+                    (ks (car s) s))))
 
 ;; >>=
 (define (bind a f)
@@ -65,10 +69,9 @@
 
 (define any-char/p
   (lambda (s ks kf)
-    (if (not (null? s))
-        (ks (car s) (cdr s))
-        (begin
-          (kf)))))
+    (if (null? s)
+        (kf)
+        (ks (car s) (cdr s)))))
 
 (define (repeat n p)
   (define (helper n1)
@@ -94,7 +97,6 @@
                     (return (bytevector-u8-ref (string->utf8 x) 0))))))
 (define uint16/p
   (bind (take 2) (lambda (x)  
-                   (format #t "~a~%" (bytevector-u16-ref (string->utf8 x) 0 'big))
                    (if (< (string-length x) 2)
                        fail (return (bytevector-u16-ref (string->utf8 x) 0 (endianness big)))))))
 (define uint32/p
@@ -131,13 +133,13 @@
   (bind (take 4) (lambda (x)
                    (if (< (string-length x) 4)
                        fail
-                       (bytevector-ieee-single-native-ref (string->utf8 x) 0)))))
+                       (return (bytevector-ieee-single-ref (string->utf8 x) 0 (endianness big)))))))
 
 (define float64/p
   (lift (take 8) (lambda (x)
                    (if (< (string-length x) 8)
                        fail
-                       (bytevector-ieee-double-native-ref (string->utf8 x) 0)))))
+                       (return (bytevector-ieee-double-ref (string->utf8 x) 0 (endianness big)))))))
 
 
 (define in-file "/home/liamp/projects/slippi_parser/test/raw.slp")
@@ -148,7 +150,7 @@
 
 (define (run-parser p str)
   (p (string->list str)
-     (lambda (v s) (format #t "Parser ran successfully. Result is ~a, remainder is.~%" (length v) ))
+     (lambda (v s) (format #t "Parser ran successfully. Result is ~a, remainder is ~a.~%" v (list->string s) ))
      (lambda () (format #t "Parser failed.~%"))))
 
 
@@ -201,18 +203,148 @@
     uint8/p
     (repeat 4 (take 31))
     (repeat 4 (take 10))
-    (return 0) ;; (repeat 4 (take 29))
-    (return 0) ;; uint8/p
+    (return '()) ;; (repeat 4 (take 29)) TODO: version-dependent parse..
+    (return '()) ;; uint8/p
     )
-   (lambda (x) (apply make-game-start x)))
-  
-  )
+   (lambda (l) (apply make-game-start l))))
+
+(define-record-type pre-frame-update
+  (fields
+   frame_number
+   player_index
+   is_follower
+   random_seed
+   action_state_id
+   x_position
+   y_position
+   facing_direction
+   joystick_x
+   joystick_y
+   c_stick_x
+   c_stick_y
+   trigger
+   processed_buttons
+   physical_buttons
+   physical_l_trigger
+   physical_r_trigger
+   x_analog_ucf
+   percent))
+
+(define pre-frame-update/p
+  (lift (all-of/p
+         int32/p
+         int8/p
+         int8/p
+         int32/p
+         int16/p
+         float32/p
+         float32/p
+         float32/p
+         float32/p
+         float32/p
+         float32/p
+         float32/p
+         float32/p
+         int32/p
+         int16/p
+         float32/p
+         float32/p
+         int8/p
+         float32/p
+         ) (lambda (l) (apply make-pre-frame-update l))))
+
+(define-record-type post-frame-update
+  (fields
+   frame_number 
+   player_index 
+   is_follower 
+   internal_character_id 
+   action_state_id 
+   x_position 
+   y_position 
+   facing_direction 
+   percent 
+   shield_size 
+   last_hitting_attack_id 
+   current_combo_count 
+   last_hit_by 
+   stocks_remaining 
+   action_state_frame_counter 
+   state_bit_flags_1 
+   state_bit_flags_2 
+   state_bit_flags_3 
+   state_bit_flags_4 
+   state_bit_flags_5 
+   misc_as 
+   ground_air_state 
+   last_ground_id 
+   jumps_remaining 
+   l_cancel_status 
+   hurtbox_collision_state 
+   self_induced_air_x_speed 
+   self_induced_air_y_speed 
+   attack_based_x_speed 
+   attack_based_y_speed 
+   self_induced_ground_x_speed 
+   hitlag_frames_remaining 
+   animation_index))
+
+(define post-frame-update/p
+  (lift (all-of/p
+    int32/p
+    uint8/p
+    uint8/p
+    uint8/p
+    uint16/p
+    float32/p
+    float32/p
+    float32/p
+    float32/p
+    float32/p
+    uint8/p
+    uint8/p
+    uint8/p
+    uint8/p
+    float32/p
+    uint8/p
+    uint8/p
+    uint8/p
+    uint8/p
+    uint8/p
+    float32/p
+    uint8/p
+    uint16/p
+    uint8/p
+    uint8/p
+    uint8/p
+    float32/p
+    float32/p
+    float32/p
+    float32/p
+    float32/p
+    float32/p
+    (return '()))
+        (lambda (l) (apply make-post-frame-update l))))
+
+(define-record-type game-end (fields game-end-method lras-initiator))
+(define game-end/p (lift (all-of/p uint8/p int8/p) (lambda (l) (apply make-game-end l))))
+
+(define-record-type frame-start
+  (fields
+   frame-number
+   random-seed
+   scene-frame-counter))
+(define frame-start/p
+  (lift (all-of/p int32/p uint32/p (return '()))
+        (lambda (l) (apply make-frame-start l))))
+
+(define-record-type frame-bookend (fields frame-number latest-finalized-frame))
+(define frame-bookend/p (lift (all-of/p int32/p uint32/p) (lambda (l) (apply make-frame-bookend l))))
 
 (define slippi/p
   (bind
    all-payload-sizes/p
    (lambda (payloads)
-     (format #t "~a ~%" payloads)
      (let ([event/p
             (bind
              take1
@@ -222,13 +354,13 @@
                    (case (string-ref s 0)
                      ;; cases 054 -> 061 and 016
                      [(#\6) game-start/p]
-                     ;; [(#\7) take1 ]
-                     ;; [(#\8) take1 ]
-                     ;; [(#\9) take1 ]
-                     ;; [(#\:) take1 ]
-                     ;; [(#\;) ]
-                     ;; [(#\<) take1 ]
-                     ;;[(#\=) ]
+                     [(#\7) pre-frame-update/p]
+                     [(#\8) post-frame-update/p ]
+                     [(#\9) game-end/p ]
+                     ;; [(#\:)  ]
+                     ;; [(#\;)  ]
+                     ;; [(#\<)  ]
+                     ;; [(#\=)  ]
                      ;; [(#\x10)]
                      [else  (take (cdr (assoc s payloads)))]))))])
        (many/p event/p)))))
