@@ -1,9 +1,4 @@
 * A Scratch Pad
 
-After becoming disappointed with some of semi-dead projects I have lying around on github, I
-figured a conceptually clean option would to have a public "scratch pad." This repo will
-contain some complete work, some partially-complete work, and, by-and-large, incomplete work
-or ideas.
-
-Not sure if this is much better than having a couple of inactive projects lying around, but
-it feels slightly less embarrassing.
+some scratch, so to speak. Each sub-directory should have some
+information of its own.
