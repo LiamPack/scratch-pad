@@ -14,17 +14,25 @@ def get_evals_evecs(g):
     
 g = nx.Graph()
 [g.add_edge(i, i+1, weight=1) for i in range(19)]
-
-e,v = get_evals_evecs(g)
-plt.plot(v[:,1])
+nx.draw_spring(g)
 plt.show()
 
-g[5][6]['weight'] = 0.01
-g[15][16]['weight'] = 0.01
+plt.cla()
+e,v = get_evals_evecs(g)
+plt.plot(v[:,1])
+plt.plot(v[:,2])
+plt.plot(v[:,3])
+plt.show()
+
+for i in range(19):
+    g[i][i+1]['weight'] = 1
+g[5][6]['weight'] = 100
+g[15][16]['weight'] = 100
+nx.draw_spring(g)
+plt.show()
 
 e,v = get_evals_evecs(g)
 print(e)
 plt.plot(v[:,1])
 plt.plot(v[:,2])
-plt.plot(v[:,3])
 plt.show()
