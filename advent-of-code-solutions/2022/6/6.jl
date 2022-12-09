@@ -1,3 +1,4 @@
+# should probably start doing readlines at some point
 input = open(f -> read(f, String), "input.txt")[1:end-1] # newline as usual
 
 function solve(s, N)

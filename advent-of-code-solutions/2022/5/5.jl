@@ -1,12 +1,12 @@
 import DataStructures: Stack
 
-function move1(stacks, N, i, j)
+function move1!(stacks, N, i, j)
     for _ in 1:N
         push!(stacks[j], pop!(stacks[i]))
     end
 end
 
-function move2(stacks, N, i, j)
+function move2!(stacks, N, i, j)
     q = [pop!(stacks[i]) for _ in 1:N]
     for k in 1:N
         push!(stacks[j], q[end-(k-1)])
@@ -42,5 +42,5 @@ moves = input[2] .|> x -> replace(x, !isnumeric => ' ') .|> x -> split(x, ' ')
 moves = filter.(x -> x != "", moves) .|> x -> map(y -> parse(Int, y), x)
 moves = moves[1:end-1]
 
-p1 = solve(init, moves, move1)
-p2 = solve(init, moves, move2)
+p1 = solve(init, moves, move1!)
+p2 = solve(init, moves, move2!)
