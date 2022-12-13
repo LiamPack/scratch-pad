@@ -6,11 +6,8 @@ start = findfirst(elevs .== 'S' - 'a')
 finish = findfirst(elevs .== 'E' - 'a')
 elevs[start] = 0
 elevs[finish] = 'z' - 'a'
-in_bounds(A, idx) = (idx[1] > 0 && idx[1] <= size(A,1)) && (idx[2] > 0 && idx[2] <= size(A,2))
-valid_elevation(A, from, to) = A[to] - A[from] <= 1
-valid_elevation2(A, from, to) = A[from] - A[to] <= 1
 
-function BFS(A, start, finish_criteria, elev_check)
+function BFS(A::Array{Int,2}, start::CartesianIndex{2}, finish_criteria::Function, elev_check::Function)
     D::Array{Float64,2} = similar(A)
     D = fill!(D, Inf)
     D[start] = 0
@@ -23,7 +20,7 @@ function BFS(A, start, finish_criteria, elev_check)
         end
         for dir in dirs
             new_pos = cur_pos + dir
-            !(in_bounds(elevs, new_pos) && elev_check(elevs, cur_pos, new_pos)) && continue
+            !(checkbounds(Bool, D, new_pos) && elev_check(elevs, cur_pos, new_pos)) && continue
             if D[new_pos] == Inf
                 push!(stack, new_pos)
             end
@@ -35,5 +32,8 @@ function BFS(A, start, finish_criteria, elev_check)
     D
 end
 
-p1 = BFS(elevs, start, (_,x) -> x == finish, valid_elevation)
-p2 = BFS(elevs, finish, (elevs, x) -> elevs[x] == 0, valid_elevation2)
+# First elevation condition is "Can't go up more than 1", second
+# condition is "Can't go down more than one" -- as if you were playing a
+# valid path back in reverse.
+p1 = BFS(elevs, start, (_,x) -> x == finish, (A,x,y) -> A[y] - A[x] <= 1)
+p2 = BFS(elevs, finish, (elevs, x) -> elevs[x] == 0, (A,x,y) -> A[x] - A[y] <= 1)
