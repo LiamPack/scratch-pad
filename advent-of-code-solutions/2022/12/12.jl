@@ -24,7 +24,7 @@ function BFS(A::Array{Int,2}, start::CartesianIndex{2}, finish_criteria::Functio
             if D[new_pos] == Inf
                 push!(stack, new_pos)
             end
-            if D[new_pos] > D[cur_pos] + 1 
+            if D[new_pos] > D[cur_pos] + 1
                 D[new_pos] = D[cur_pos] + 1
             end
         end
@@ -35,5 +35,6 @@ end
 # First elevation condition is "Can't go up more than 1", second
 # condition is "Can't go down more than one" -- as if you were playing a
 # valid path back in reverse.
-p1 = BFS(elevs, start, (_,x) -> x == finish, (A,x,y) -> A[y] - A[x] <= 1)
-p2 = BFS(elevs, finish, (elevs, x) -> elevs[x] == 0, (A,x,y) -> A[x] - A[y] <= 1)
+p1 = BFS(elevs, start, (_, x) -> x == finish, (A, x, y) -> A[y] - A[x] <= 1)
+p2 = BFS(elevs, finish, (elevs, x) -> elevs[x] == 0, (A, x, y) -> A[x] - A[y] <= 1)
+println((p1, p2))
