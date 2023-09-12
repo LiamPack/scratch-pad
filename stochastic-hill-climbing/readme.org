@@ -1,0 +1,71 @@
+#+TITLE: Stochastic Hill Climbing
+
+Some experiments in quantifying global convergence properties of a
+stochastic process along the lines of:
+
+\[(1)\,\,\,\, x_{k+1} = x_k + f(x_k)\sigma(0,1)\]
+
+where $f(x_k)$ is (hopefully) a monotonic function in $|x* - x_k|$,
+where $x*$ is the optimal value of the problem.
+
+More common is the use of "stochastic" gradient descent:
+
+\[x_{k+1} = x_k - \alpha_n \nabla f + 1/sqrt(log(n)) \sigma(0,1)\]
+
+where $\alpha_n$ usually scales something like $n^{-1/2}$, or sometimes
+linear.
+
+* Main Questions
+- What is the limiting distribution of (1) for simple functions $f$?
+  e.g. piecewise constant, piecewise continuous, etc. with degenerate
+  basins
+  - in other words, we no longer assume f^{-1}(0) = {x*} and allow a
+    more rich set, currently restricting to convex
+- Does the limiting distribution of (1) inherit the symmetry of
+  f^{-1}(0)? Does it depend on the discretization of the process? Does
+  symmetry vanish in a limiting case?
+- What is the dependence on the boundary layer? Is it a modified heat
+  equation with a perturbation parameter for the boundary condition?
+* Experiments
+change heat and step-size for each. possible quantifications:
+- orders of the moments of the limiting distribution with varying
+  temperatures and BCs
+
+** 1D, long-Torus
+- symmetric piecewise-constant boundary conditions, flat region where f(x) = 0
+- asymmetric piecewise-constant boundary conditions, flat region where f(x) = 0
+  - is the distribution still symmetric in the region, with no
+    inheritance of the boundary condition imbalance?
+** 2D, also a torus
+- symmetric BCs, piecewise constant (cubical central region)
+- symmetric BCs, piecewise constant (circular central region)
+- symmetric BCs, sloping down into basin (circular)
+- asymmetric BCs, lower half-plane vs. upper half-plane (circular
+  maybe, cubic too)
+
+** 3D, I guess a torus 
+spherical region should be easy as a first analysis, pick a ball B(0,R) for
+f(x) = 0 and analyze P(|x| <= r) for r < R.
+
+same ideas as above: 
+- different values on orthants, piecewise constant
+- different values on orthants, piecewise cts with possibly r^2 strength
+
+* Relevant Papers
+- Towards Theoretically Understanding why SGD generalizes better than
+  ADAM in Deep Learning https://arxiv.org/pdf/2010.05627v2.pdf 
+  - Big idea: both SGD and ADAM have a preference towards flat
+    minima -- where a "flat minima" is defined as a basin containing a
+    local minimum point with large radon measure. The escape time from
+    such a basin will be long due to the sheer volume of the basin, so
+    that sharp "small measure" basins will have significantly shorter
+    escape time.
+  - This is an interplay: gradient descent dominates the dynamics near
+    a strongly convex region of large volume, and stochastic drift
+    dominates in regions of small volume and large regions of low
+    geometric curvature
+- Lectures in Geometric Measure Theory ( L. Simon. Lectures on
+  geometric measure theory. The Australian National University,
+  Mathematical Sciences Institute, Centre . . . , 1983)
+  - potentially helpful for ideas in radon measure (inner, outer
+    regular and locally finite)
