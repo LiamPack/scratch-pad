@@ -1,5 +1,6 @@
 using LinearAlgebra
 using Distributions
+using MultivariateStats
 using Plots
 
 d(n) = MvNormal(zeros(n), I)
@@ -17,6 +18,7 @@ make_temperature(region, temp_f, scale=0.1) =  x -> (region(x) ? scale : 1) * te
 
 step(xn, t) = xn + t * rand(d(length(xn)))
 step_torus(xn, t, L) = mod.(step(xn, t), L)
+
 
 
 function torus(N, L)
@@ -39,7 +41,7 @@ function ndtorus(N, L, d)
     warmup = floor(Int, N/10)
     xs = [rand(Float64, d) .* L]
     
-    temp = make_temperature(x -> shift(x, 5) |> unit_cube, x -> x[1] > 5 ? 5 : 2)
+    temp = make_temperature(x -> shift(x, 5) |> unit_cube, x -> 5)
     for i in 1:N
         xn = xs[end]
         push!(xs, step_torus(xn, temp(xn), L))
@@ -47,7 +49,12 @@ function ndtorus(N, L, d)
     return xs[warmup:end]
 end
 
-xs = ndtorus(1e6, 10, 2)
+
+
+xs = ndtorus(1e6, 10, 10)
+xs0 = xs .|> x -> x .- 5
+rs = norm.(xs0)
+
 
 # histogram2d(first.(xs), xs .|> v -> v[2], normalize=:pdf, bins=(20,20))
 
@@ -60,3 +67,7 @@ xs = ndtorus(1e6, 10, 2)
 # check escape times -- for i in 1:N, when in_region(xs[i]), loop j=i until xs[j] out of region. record j and see distribution
 
 # WTS: for small temperatures, in a convex region the argmax(P(x)) should lie on the centroid w/ gaussian dist
+
+# https://juliastats.org/MultivariateStats.jl/dev/pca/
+# https://juliastats.org/Distributions.jl/stable/multivariate/#Distributions.MvNormal
+# https://docs.juliahub.com/SpectralDistances/d1rIE/0.1.12/interpolations/
